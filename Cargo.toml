@@ -1,0 +1,15 @@
+[package]
+name = "byron-kernel"
+version = "0.1.0"
+edition = "2021"
+
+[package.metadata.bootimage]
+run-args = ["-serial", "stdio"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+members = ["kernel"]
+
+[dependencies]
+bootloader = { version = "0.9.23", features = ["map_physical_memory"] }
+kernel = { version = "0.1.0", path = "kernel" }
