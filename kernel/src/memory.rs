@@ -20,25 +20,6 @@ unsafe fn active_level_4_table(physical_offset: VirtAddr) -> &'static mut PageTa
     &mut *page_table_ptr
 }
 
-pub struct DummyFrameAlloc;
-unsafe impl FrameAllocator<Size4KiB> for DummyFrameAlloc {
-    fn allocate_frame(&mut self) -> Option<PhysFrame> {
-        None
-    }
-}
-
-pub fn create_example_page(
-    page: Page,
-    mapper: &mut OffsetPageTable,
-    frame_alloc: &mut impl FrameAllocator<Size4KiB>,
-) {
-    use x86_64::structures::paging::PageTableFlags as Flags;
-    let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
-    let flags = Flags::PRESENT | Flags::WRITABLE;
-
-    let map_to_res = unsafe { mapper.map_to(page, frame, flags, frame_alloc) };
-    map_to_res.expect("map_to failed").flush();
-}
 pub struct BootInfoFrameAlloc {
     mem_map: &'static MemoryMap,
     next: usize,
