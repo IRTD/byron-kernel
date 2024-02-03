@@ -1,3 +1,4 @@
+use alloc::vec::Vec;
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
 use x86_64::structures::paging::OffsetPageTable;
 use x86_64::{
@@ -20,14 +21,14 @@ unsafe fn active_level_4_table(physical_offset: VirtAddr) -> &'static mut PageTa
     &mut *page_table_ptr
 }
 
-pub struct BootInfoFrameAlloc {
+pub struct FirstZoneAlloc {
     mem_map: &'static MemoryMap,
     next: usize,
 }
 
-impl BootInfoFrameAlloc {
+impl FirstZoneAlloc {
     pub unsafe fn init(mem_map: &'static MemoryMap) -> Self {
-        BootInfoFrameAlloc { mem_map, next: 0 }
+        FirstZoneAlloc { mem_map, next: 0 }
     }
 
     fn usable_frames(&self) -> impl Iterator<Item = PhysFrame> {
@@ -40,10 +41,16 @@ impl BootInfoFrameAlloc {
     }
 }
 
-unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAlloc {
+unsafe impl FrameAllocator<Size4KiB> for FirstZoneAlloc {
     fn allocate_frame(&mut self) -> Option<PhysFrame> {
         let frame = self.usable_frames().nth(self.next);
         self.next += 1;
         frame
     }
+}
+
+pub struct SecondZoneAlloc {
+    mem_map: &'static MemoryMap,
+    next: usize,
+    frames: Vec<PhysFrame>,
 }

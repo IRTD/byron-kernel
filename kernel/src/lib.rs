@@ -16,7 +16,9 @@ pub mod serial;
 pub mod vga;
 pub use x86_64;
 
-use bootloader::bootinfo::BootInfo;
+use bootloader::bootinfo::{BootInfo, MemoryMap};
+use lazy_static::lazy_static;
+use spin::Mutex;
 use x86_64::VirtAddr;
 
 pub fn init(boot_info: &'static BootInfo) {
@@ -32,8 +34,8 @@ pub fn init(boot_info: &'static BootInfo) {
     println!("Creating Mapper, FrameAllocator and Heap");
     let offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(offset) };
-    let mut frame_alloc = unsafe { memory::BootInfoFrameAlloc::init(&boot_info.memory_map) };
-    allocator::init_heap(&mut mapper, &mut frame_alloc).expect("Failed to init heap");
+    let mut frame_alloc = unsafe { memory::FirstZoneAlloc::init(&boot_info.memory_map) };
+    allocator::init_heap_stage_1(&mut mapper, &mut frame_alloc).expect("Failed to init heap");
     println!("\n");
     println!("[FRIDAY] :: Good Morning!\n");
 }

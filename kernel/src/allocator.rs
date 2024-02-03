@@ -11,9 +11,9 @@ use x86_64::{
 };
 
 pub const HEAP_START: usize = 0x_4444_4444_0000; // More or less random addr for easy recognition
-pub const HEAP_SIZE: usize = 8 * MiB;
+pub const HEAP_SIZE: usize = 1 * MiB;
 
-pub fn init_heap(
+pub fn init_heap_stage_1(
     mapper: &mut impl Mapper<Size4KiB>,
     frame_alloc: &mut impl FrameAllocator<Size4KiB>,
 ) -> Result<(), MapToError<Size4KiB>> {
@@ -39,15 +39,3 @@ pub fn init_heap(
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
-
-pub struct Dummy;
-
-unsafe impl GlobalAlloc for Dummy {
-    unsafe fn alloc(&self, _layout: Layout) -> *mut u8 {
-        null_mut()
-    }
-
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {
-        panic!("[[USING DUMMY ALLOC]]\nDealloc should never be called!!!")
-    }
-}
