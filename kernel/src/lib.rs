@@ -6,6 +6,7 @@
 extern crate alloc;
 
 pub mod allocator;
+pub mod byte_sizes;
 pub mod cursor;
 mod gdt;
 pub mod interrupts;
